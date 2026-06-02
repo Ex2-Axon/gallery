@@ -262,6 +262,100 @@ export default function App() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
 
+  const fetchGitHubTemplates = async (forceRefresh = false) => {
+    setIsLoadingTemplates(true);
+    
+    // 1. Check Cache first (valid for 5 minutes) to avoid Rate Limits
+    const cacheKey = 'axon_github_repos_cache';
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData && !forceRefresh) {
+      const { timestamp, data } = JSON.parse(cachedData);
+      if (Date.now() - timestamp < 5 * 60 * 1000) { // 5 minutes
+        console.log('Using cached GitHub data to save API rate limit.');
+        setTemplates(data);
+        setIsLoadingTemplates(false);
+        return;
+      }
+    }
+
+    try {
+      // Add cache buster to get truly latest data
+      const response = await fetch(`https://api.github.com/orgs/Ex2-Axon/repos?per_page=100&sort=pushed&t=${Date.now()}`);
+      
+      if (response.status === 403) {
+        throw new Error('GitHub API Rate Limit Exceeded (60 req/hr). Please try again later.');
+      }
+      
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const repos = await response.json();
+      console.log(`Successfully fetched ${repos.length} repos from GitHub.`);
+      
+      const githubTemplates: Template[] = repos
+        .filter((repo: any) => repo.name.toLowerCase().startsWith('x-template-'))
+        .map((repo: any) => {
+          // Check if we have curated data for this repo
+          const curated = TEMPLATES_DATA.find(t => t.id === repo.name);
+          
+          if (curated) {
+            return {
+              ...curated,
+              imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${repo.name}/main/.github/screenshots/latest.png`,
+              demoUrl: `https://ex2-axon.github.io/${repo.name}/`
+            };
+          }
+
+          // Default metadata for new/unknown repos
+          return {
+            id: repo.name,
+            title: repo.name.replace(/-/g, ' ').toUpperCase(),
+            category: (repo.topics?.includes('ecommerce') ? 'E-Commerce' : 
+                       repo.topics?.includes('saas') ? 'SaaS' : 
+                       repo.topics?.includes('dashboard') ? 'Dashboard' : 
+                       repo.topics?.includes('portfolio') ? 'Portfolio' : 'Special') as any,
+            tags: repo.topics || ['Automated'],
+            description: repo.description || 'เทมเพลตใหม่จากระบบ Axon Engine ที่ตรวจพบโดยอัตโนมัติ',
+            demoUrl: `https://ex2-axon.github.io/${repo.name}/`,
+            imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${repo.name}/main/.github/screenshots/latest.png`,
+            difficulty: (repo.topics?.includes('advanced') ? 'Advanced' : 
+                         repo.topics?.includes('intermediate') ? 'Intermediate' : 'Beginner') as any,
+            techStack: repo.topics?.filter((t: string) => ['react', 'tailwind', 'typescript', 'vite'].includes(t)) || ['HTML', 'Tailwind CSS']
+          };
+        });
+
+      // Merge curated data
+      const finalTemplates = [...githubTemplates];
+      TEMPLATES_DATA.forEach(curated => {
+        if (!finalTemplates.find(t => t.id === curated.id)) {
+          finalTemplates.push(curated);
+        }
+      });
+
+      // Update state and cache
+      setTemplates(finalTemplates);
+      localStorage.setItem(cacheKey, JSON.stringify({
+        timestamp: Date.now(),
+        data: finalTemplates
+      }));
+
+    } catch (err: any) {
+      console.error('Error fetching templates:', err);
+      showToast(err.message.includes('Rate Limit') ? 'GitHub Rate Limit: จะใช้ข้อมูลจาก Cache แทน' : 'ไม่สามารถดึงข้อมูลล่าสุดได้');
+      
+      // If we have cached data (even if expired), use it as fallback instead of just hardcoded data
+      if (cachedData) {
+        const { data } = JSON.parse(cachedData);
+        setTemplates(data);
+      } else {
+        setTemplates(TEMPLATES_DATA);
+      }
+    } finally {
+      setIsLoadingTemplates(false);
+    }
+  };
+
   // Sync state with URL hash (Simple Router)
   useEffect(() => {
     const handleHashChange = () => {
@@ -292,63 +386,6 @@ export default function App() {
 
   // Fetch real-time templates from GitHub
   useEffect(() => {
-    const fetchGitHubTemplates = async () => {
-      setIsLoadingTemplates(true);
-      try {
-        const response = await fetch('https://api.github.com/orgs/Ex2-Axon/repos?per_page=100&sort=pushed');
-        if (!response.ok) throw new Error('Failed to fetch repos');
-        
-        const repos = await response.json();
-        const githubTemplates: Template[] = repos
-          .filter((repo: any) => repo.name.startsWith('x-template-'))
-          .map((repo: any) => {
-            // Check if we have curated data for this repo
-            const curated = TEMPLATES_DATA.find(t => t.id === repo.name);
-            
-            if (curated) {
-              return {
-                ...curated,
-                // Update with live info from GitHub if needed
-                imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${repo.name}/main/.github/screenshots/latest.png`,
-                demoUrl: `https://ex2-axon.github.io/${repo.name}/`
-              };
-            }
-
-            // Default metadata for new/unknown repos
-            return {
-              id: repo.name,
-              title: repo.name.replace(/-/g, ' ').toUpperCase(),
-              category: (repo.topics?.includes('ecommerce') ? 'E-Commerce' : 
-                         repo.topics?.includes('saas') ? 'SaaS' : 
-                         repo.topics?.includes('dashboard') ? 'Dashboard' : 
-                         repo.topics?.includes('portfolio') ? 'Portfolio' : 'Special') as any,
-              tags: repo.topics || ['Automated'],
-              description: repo.description || 'เทมเพลตใหม่จากระบบ Axon Engine ที่ตรวจพบโดยอัตโนมัติ',
-              demoUrl: `https://ex2-axon.github.io/${repo.name}/`,
-              imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${repo.name}/main/.github/screenshots/latest.png`,
-              difficulty: (repo.topics?.includes('advanced') ? 'Advanced' : 
-                           repo.topics?.includes('intermediate') ? 'Intermediate' : 'Beginner') as any,
-              techStack: repo.topics?.filter((t: string) => ['react', 'tailwind', 'typescript', 'vite'].includes(t)) || ['HTML', 'Tailwind CSS']
-            };
-          });
-
-        // Merge curated data that might not be in the current GitHub fetch (e.g. archived or private)
-        const finalTemplates = [...githubTemplates];
-        TEMPLATES_DATA.forEach(curated => {
-          if (!finalTemplates.find(t => t.id === curated.id)) {
-            finalTemplates.push(curated);
-          }
-        });
-
-        setTemplates(finalTemplates);
-      } catch (err) {
-        console.error('Error fetching templates:', err);
-        showToast('ไม่สามารถดึงข้อมูลเทมเพลตล่าสุดจาก GitHub ได้ ใช้ข้อมูลสำรองแทน');
-      } finally {
-        setIsLoadingTemplates(false);
-      }
-    };
-
     fetchGitHubTemplates();
   }, []);
 
@@ -661,14 +698,26 @@ Return your response strictly in JSON format matching this schema:
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  {searchQuery && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    {searchQuery && (
+                      <button 
+                        onClick={() => setSearchQuery('')}
+                        className="text-xs text-slate-400 hover:text-white"
+                      >
+                        ล้าง
+                      </button>
+                    )}
                     <button 
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
+                      onClick={() => fetchGitHubTemplates(true)}
+                      disabled={isLoadingTemplates}
+                      className="p-1 text-slate-400 hover:text-cyan-400 transition-colors disabled:opacity-50"
+                      title="รีเฟรชข้อมูลจาก GitHub"
                     >
-                      ล้าง
+                      <svg className={`w-4 h-4 ${isLoadingTemplates ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
                     </button>
-                  )}
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
