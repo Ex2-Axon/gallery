@@ -1,0 +1,107 @@
+name: Discord Release Notify
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  notify:
+    name: Send Discord Notification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # need previous commit for diff
+
+      - name: Read version from package.json
+        id: pkg
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          APP_NAME=$(node -p "require('./package.json').name")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Get commit info
+        id: commit
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+          COMMIT_HASH=$(git log -1 --pretty=format:"%h")
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -10 | sed 's/^/• /' | tr '\n' '\n')
+          FILE_COUNT=$(git diff --name-only HEAD~1 HEAD | wc -l | tr -d ' ')
+          echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+          # multiline output
+          {
+            echo "changed_files<<EOF"
+            git diff --name-only HEAD~1 HEAD | head -10 | sed 's/^/\`/' | sed 's/$/\`/'
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Send Discord embed
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          REPO_URL="https://github.com/${{ github.repository }}"
+          COMMIT_URL="${REPO_URL}/commit/${{ github.sha }}"
+          BRANCH="${{ github.ref_name }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          PAYLOAD=$(cat <<EOF
+          {
+            "username": "Axon Deploy Bot",
+            "avatar_url": "https://vitejs.dev/logo.svg",
+            "embeds": [
+              {
+                "title": "🚀  ${{ steps.pkg.outputs.app_name }}  v${{ steps.pkg.outputs.version }}",
+                "url": "${COMMIT_URL}",
+                "color": 65535,
+                "description": "New push to **${BRANCH}** branch",
+                "fields": [
+                  {
+                    "name": "📝  Commit",
+                    "value": "[\`${{ steps.commit.outputs.hash }}\`](${COMMIT_URL})  ${{ steps.commit.outputs.message }}",
+                    "inline": false
+                  },
+                  {
+                    "name": "👤  Author",
+                    "value": "${{ steps.commit.outputs.author }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "🌿  Branch",
+                    "value": "\`${BRANCH}\`",
+                    "inline": true
+                  },
+                  {
+                    "name": "📁  Files Changed",
+                    "value": "${{ steps.commit.outputs.file_count }} file(s)",
+                    "inline": true
+                  },
+                  {
+                    "name": "🗂️  Changed Files",
+                    "value": "${{ steps.commit.outputs.changed_files }}",
+                    "inline": false
+                  }
+                ],
+                "footer": {
+                  "text": "GitHub Actions  •  ${{ github.repository }}",
+                  "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                },
+                "timestamp": "${TIMESTAMP}"
+              }
+            ]
+          }
+          EOF
+          )
+
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK"
