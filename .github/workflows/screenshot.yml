@@ -84,14 +84,26 @@ jobs:
           git push
 
       - name: Send to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          # choose first non-empty secret (allow either name)
+          WEBHOOK="${DISCORD_WEBHOOK_URL:-${DISCORD_WEBHOOK}}"
+          if [ -z "$WEBHOOK" ]; then
+            echo "Error: Discord webhook not set. Add secrets.DISCORD_WEBHOOK_URL or secrets.DISCORD_WEBHOOK" >&2
+            exit 1
+          fi
+
           SITE_URL="https://ex2-axon.github.io/gallery/"
           COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          THREAD_NAME="deploy-${{ github.run_id }}"
+
           curl -s -o /dev/null \
-            -F "payload_json={\"username\":\"Axon Deploy Bot\",\"embeds\":[{\"title\":\"${{ steps.pkg.outputs.app_name }} v${{ steps.pkg.outputs.version }} deployed\",\"url\":\"${SITE_URL}\",\"color\":65535,\"fields\":[{\"name\":\"Commit\",\"value\":\"${{ steps.commit.outputs.hash }} ${{ steps.commit.outputs.message }}\"}],\"image\":{\"url\":\"attachment://screenshot.png\"},\"timestamp\":\"${TIMESTAMP}\"}]}" \
+            -F "payload_json={\"username\":\"Axon Deploy Bot\",\"thread_name\":\"${THREAD_NAME}\",\"embeds\":[{\"title\":\"${{ steps.pkg.outputs.app_name }} v${{ steps.pkg.outputs.version }} deployed\",\"url\":\"${SITE_URL}\",\"color\":65535,\"fields\":[{\"name\":\"Commit\",\"value\":\"${{ steps.commit.outputs.hash }} ${{ steps.commit.outputs.message }}\"}],\"image\":{\"url\":\"attachment://screenshot.png\"},\"timestamp\":\"${TIMESTAMP}\"}]}}" \
             -F "files[0]=@screenshot.png;type=image/png" \
-            "${{ secrets.DISCORD_WEBHOOK_URL }}"
+            "$WEBHOOK"
           echo "Sent to Discord"
 
       - name: Post to Bluesky
