@@ -1,224 +1,10 @@
 import React, { useState, useEffect } from 'react';
-
-// === interfaces ===
-interface Template {
-  id: string;
-  title: string;
-  category: 'Portfolio' | 'SaaS' | 'E-Commerce' | 'Blog' | 'Dashboard' | 'Special';
-  tags: string[];
-  description: string;
-  demoUrl: string;
-  imageUrl: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  techStack: string[];
-}
-
-// === mock database from gallery.html with enriched metadata ===
-const TEMPLATES_DATA: Template[] = [
-  {
-    id: 'x-template-002',
-    title: 'x-template-002: Minimal Portfolio',
-    category: 'Portfolio',
-    tags: ['Personal', 'Resume', 'Clean', 'Minimalist'],
-    description: 'พอร์ตโฟลิโอสไตล์มินิมอล เน้นความเรียบง่าย นำเสนอผลงานและทักษะของคุณอย่างเป็นมืออาชีพ',
-    demoUrl: 'https://ex2-axon.github.io/x-template-002/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-002/main/.github/screenshots/latest.png',
-    difficulty: 'Beginner',
-    techStack: ['HTML', 'Tailwind CSS', 'AlpineJS']
-  },
-  {
-    id: 'x-template-003',
-    title: 'x-template-003: SaaS Product Page',
-    category: 'SaaS',
-    tags: ['SaaS', 'Marketing', 'Landing Page', 'Pricing'],
-    description: 'แลนดิงเพจสำหรับซอฟต์แวร์หรือบริการ SaaS โดดเด่นด้วยโทนสีเทคและการจัดวางส่วนฟีเจอร์อย่างลงตัว',
-    demoUrl: 'https://ex2-axon.github.io/x-template-003/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-003/main/.github/screenshots/latest.png',
-    difficulty: 'Beginner',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-020',
-    title: 'x-template-020: Grid Storefront',
-    category: 'E-Commerce',
-    tags: ['E-Commerce', 'Shop', 'Product Grid', 'Cart'],
-    description: 'หน้าร้านค้าออนไลน์แสดงรายการสินค้าในรูปแบบ Grid คลีนตา มีปุ่มหยิบใส่ตะกร้าและตัวกรองสินค้าอย่างดี',
-    demoUrl: 'https://ex2-axon.github.io/x-template-020/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-020/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS', 'JavaScript']
-  },
-  {
-    id: 'x-template-021',
-    title: 'x-template-021: Single Product Detail',
-    category: 'E-Commerce',
-    tags: ['Store', 'Product Detail', 'Buy Flow', 'Gallery'],
-    description: 'หน้าแสดงรายละเอียดสินค้าแบบเจาะลึก พร้อมแกลเลอรีรูปภาพสินค้า แผงเลือกขนาด/สี และระบบรีวิว',
-    demoUrl: 'https://ex2-axon.github.io/x-template-021/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-021/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-022',
-    title: 'x-template-022: Dynamic SaaS Portal',
-    category: 'SaaS',
-    tags: ['SaaS', 'Analytics', 'Conversion', 'Feature Grid'],
-    description: 'แลนดิงเพจส่งเสริมการขายผลิตภัณฑ์เทคโนโลยี แสดงตารางราคาจำลองและวิดเจ็ตสถิติเพื่อความน่าเชื่อถือ',
-    demoUrl: 'https://ex2-axon.github.io/x-template-022/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-022/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS', 'Framer-like CSS']
-  },
-  {
-    id: 'x-template-023',
-    title: 'x-template-023: Creative Agency Portfolio',
-    category: 'Portfolio',
-    tags: ['Agency', 'Creative', 'Bold Typography', 'Services'],
-    description: 'เทมเพลตสำหรับบริษัทครีเอทีฟและเอเจนซี่ ดีไซน์ด้วยตัวอักษรขนาดใหญ่ ทรงพลัง และส่วนแสดงผลงานแบบโมเดิร์น',
-    demoUrl: 'https://ex2-axon.github.io/x-template-023/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-023/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-024',
-    title: 'x-template-024: Mobile App Landing',
-    category: 'SaaS',
-    tags: ['App Promo', 'Mobile', 'iOS', 'Android'],
-    description: 'หน้าเว็บโปรโมตแอปพลิเคชันมือถือ ประกอบด้วยปุ่มดาวน์โหลด สไลเดอร์จำลองฟังก์ชัน และรีวิวจากผู้ใช้',
-    demoUrl: 'https://ex2-axon.github.io/x-template-024/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-024/main/.github/screenshots/latest.png',
-    difficulty: 'Beginner',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-025',
-    title: 'x-template-025: Tech Resume & Skills',
-    category: 'Portfolio',
-    tags: ['Developer', 'Interactive CV', 'Timeline', 'Contact'],
-    description: 'ประวัติส่วนตัวสำหรับนักพัฒนาสายเทค มีแถบแสดงระดับทักษะ ไทม์ไลน์ประสบการณ์ทำงาน และฟอร์มติดต่อกลับ',
-    demoUrl: 'https://ex2-axon.github.io/x-template-025/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-025/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS', 'Interactive JS']
-  },
-  {
-    id: 'x-template-026',
-    title: 'x-template-026: Editorial Blog',
-    category: 'Blog',
-    tags: ['Blog', 'Magazine', 'Minimalist Reader', 'Articles'],
-    description: 'เทมเพลตบล็อกสายเขียนสไตล์คลีนตา สบายสำหรับการอ่านคอนเทนต์ขนาดยาว พร้อมเลย์เอาต์การนำเสนอที่สวยงาม',
-    demoUrl: 'https://ex2-axon.github.io/x-template-026/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-026/main/.github/screenshots/latest.png',
-    difficulty: 'Beginner',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-027',
-    title: 'x-template-027: Multi-column Blog',
-    category: 'Blog',
-    tags: ['News', 'Grid Layout', 'Newsletter', 'Categories'],
-    description: 'หน้าแรกของเว็บไซต์ข่าวหรือบทความแบบหลายคอลัมน์ มีระบบกรองหัวข้อบทความและส่วนสมัครสมาชิกจดหมายข่าว',
-    demoUrl: 'https://ex2-axon.github.io/x-template-027/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-027/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS', 'JS Search']
-  },
-  {
-    id: 'x-template-028',
-    title: 'x-template-028: Dark Creative Portfolio',
-    category: 'Portfolio',
-    tags: ['Dark Theme', 'Designer', 'Photography', 'Art'],
-    description: 'พอร์ตโฟลิโอโทนมืดลึกลับ เหมาะสำหรับดีไซเนอร์และช่างภาพที่ต้องการเน้นรูปภาพผลงานให้โดดเด่นท่ามกลางความมืด',
-    demoUrl: 'https://ex2-axon.github.io/x-template-028/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-028/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-030',
-    title: 'x-template-030: Creative Magazine Homepage',
-    category: 'Blog',
-    tags: ['Magazine', 'Bold', 'Rich Grid', 'Trending Section'],
-    description: 'หน้าแรกนิตยสารออนไลน์สุดล้ำ แบ่งหมวดหมู่บทความย่อยด้วยดีไซน์ตารางสลับขนาด (Complex Grid Layout)',
-    demoUrl: 'https://ex2-axon.github.io/x-template-030/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-030/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-031',
-    title: 'x-template-031: Modern CRM Dashboard',
-    category: 'Dashboard',
-    tags: ['Admin', 'SaaS Panel', 'Charts', 'Data Visualization'],
-    description: 'แผงควบคุมหลังบ้านระบบ CRM ดีไซน์โมเดิร์น แถบเมนูด้านซ้ายและกราฟวงกลมจำลองยอดขายและการเติบโต',
-    demoUrl: 'https://ex2-axon.github.io/x-template-031/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-031/main/.github/screenshots/latest.png',
-    difficulty: 'Advanced',
-    techStack: ['HTML', 'Tailwind CSS', 'ChartJS Mockup']
-  },
-  {
-    id: 'x-template-032',
-    title: 'x-template-032: Ultimate E-Commerce Hub',
-    category: 'E-Commerce',
-    tags: ['Store', 'E-Commerce', 'Checkout', 'Filter Panel'],
-    description: 'แพลตฟอร์มช้อปปิ้งสมบูรณ์แบบ มีระบบแยกหมวดหมู่สินค้าอย่างละเอียด แถบจัดการราคาสินค้า และหน้าจ่ายเงินสำเร็จรูป',
-    demoUrl: 'https://ex2-axon.github.io/x-template-032/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-032/main/.github/screenshots/latest.png',
-    difficulty: 'Advanced',
-    techStack: ['HTML', 'Tailwind CSS', 'Vanilla JS']
-  },
-  {
-    id: 'x-template-033',
-    title: 'x-template-033: Kanban Project Board',
-    category: 'Dashboard',
-    tags: ['Kanban', 'Management', 'Tasks', 'Board View'],
-    description: 'วิดเจ็ตหรือหน้าจัดการงานแบบ Kanban Card สามารถดูสถานะ To-Do, In-Progress และ Done ได้อย่างรวดเร็ว',
-    demoUrl: 'https://ex2-axon.github.io/x-template-033/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-033/main/.github/screenshots/latest.png',
-    difficulty: 'Advanced',
-    techStack: ['HTML', 'Tailwind CSS', 'Interactive Cards']
-  },
-  {
-    id: 'x-template-034',
-    title: 'x-template-034: Advanced Analytics Portal',
-    category: 'Dashboard',
-    tags: ['Charts', 'Analytics', 'System Logs', 'Database UI'],
-    description: 'แดชบอร์ดจำลองค่าเซิร์ฟเวอร์และการวิเคราะห์ข้อมูลทราฟฟิกเว็บแบบลงลึก รายงานปริมาณการใช้งานในรูปแบบเรียลไทม์',
-    demoUrl: 'https://ex2-axon.github.io/x-template-034/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-034/main/.github/screenshots/latest.png',
-    difficulty: 'Advanced',
-    techStack: ['HTML', 'Tailwind CSS', 'Advanced Mockups']
-  },
-  {
-    id: 'x-template-035',
-    title: 'x-template-035: User Profile Settings Hub',
-    category: 'Dashboard',
-    tags: ['Profile', 'Settings', 'Account Management', 'Security'],
-    description: 'แผงหน้าจัดการโปรไฟล์และความปลอดภัยของผู้ใช้งาน แบ่งกลุ่มย่อยอย่างเป็นระบบ เช่น ข้อมูลส่วนตัว รหัสผ่าน และการแจ้งเตือน',
-    demoUrl: 'https://ex2-axon.github.io/x-template-035/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-035/main/.github/screenshots/latest.png',
-    difficulty: 'Intermediate',
-    techStack: ['HTML', 'Tailwind CSS']
-  },
-  {
-    id: 'x-template-special-001',
-    title: 'x-template-special-001: Cyberpunk Landing',
-    category: 'Special',
-    tags: ['Cyberpunk', 'Glassmorphic', 'Neon Glowing', 'Next-Gen'],
-    description: 'หน้าเว็บโปรโมตสุดล้ำลึกที่มาพร้อมกลิ่นอายไซเบอร์พังก์ การจัดแต่งขอบแบบเรืองแสงสว่างและฟิลเตอร์กระจกฝ้า',
-    demoUrl: 'https://ex2-axon.github.io/x-template-special-001/',
-    imageUrl: 'https://raw.githubusercontent.com/Ex2-Axon/x-template-special-001/main/.github/screenshots/latest.png',
-    difficulty: 'Advanced',
-    techStack: ['HTML', 'Tailwind CSS', 'Special FX']
-  }
-];
+import { type Template, CURATED_TEMPLATES } from './curated-data';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<'gallery' | 'detail' | 'assistant' | 'about'>('gallery');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [templates, setTemplates] = useState<Template[]>(TEMPLATES_DATA);
+  const [templates, setTemplates] = useState<Template[]>(CURATED_TEMPLATES);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   
   // Search, Filters & Sorting state
@@ -228,133 +14,74 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<'id' | 'title' | 'difficulty'>('id');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<string[]>([]);
-
-  // Try to load pre-generated templates JSON produced by the Python script
-  useEffect(() => {
-    const loadGenerated = async () => {
-      try {
-        const r = await fetch('/templates.generated.json');
-        if (!r.ok) return;
-        const data = await r.json();
-        const mapped = (data as any[]).map(d => ({
-          id: d.id,
-          title: d.title || d.id,
-          category: 'Special' as any,
-          tags: [],
-          description: '',
-          demoUrl: d.demoUrl,
-          imageUrl: d.imageUrl,
-          difficulty: 'Beginner' as any,
-          techStack: []
-        }));
-        setTemplates(mapped);
-        setIsLoadingTemplates(false);
-      } catch (e) {
-        // ignore and fallback to fetching from GitHub
-      }
-    };
-    loadGenerated();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   
   // Detail Simulator settings
   const [deviceMode, setDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
 
-  const fetchGitHubTemplates = async (forceRefresh = false) => {
+  // 1. Logic สำหรับการดึงข้อมูลอัตโนมัติจากไฟล์ JSON ที่ Python สร้างไว้
+  const fetchTemplatesData = async (forceRefresh = false) => {
     setIsLoadingTemplates(true);
+    const cacheKey = 'axon_templates_cache';
     
-    // 1. Check Cache first (valid for 5 minutes) to avoid Rate Limits
-    const cacheKey = 'axon_github_repos_cache';
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData && !forceRefresh) {
-      const { timestamp, data } = JSON.parse(cachedData);
-      if (Date.now() - timestamp < 5 * 60 * 1000) { // 5 minutes
-        console.log('Using cached GitHub data to save API rate limit.');
-        setTemplates(data);
-        setIsLoadingTemplates(false);
-        return;
+    // Check Cache
+    if (!forceRefresh) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const { timestamp, data } = JSON.parse(cached);
+          if (Date.now() - timestamp < 5 * 60 * 1000) { // Cache 5 min
+            setTemplates(data);
+            setIsLoadingTemplates(false);
+            return;
+          }
+        } catch (e) {
+          localStorage.removeItem(cacheKey);
+        }
       }
     }
 
     try {
-      // Add cache buster to get truly latest data
-      const response = await fetch(`https://api.github.com/orgs/Ex2-Axon/repos?per_page=100&sort=pushed&t=${Date.now()}`);
+      // ดึงรายชื่อ ID จากไฟล์ที่ Python บันทึกไว้ (แหล่งข้อมูลหลัก)
+      const response = await fetch(`/templates-auto.json?t=${Date.now()}`);
+      if (!response.ok) throw new Error('Could not load automated templates list');
       
-      if (response.status === 403) {
-        throw new Error('GitHub API Rate Limit Exceeded (60 req/hr). Please try again later.');
-      }
+      const autoIds: string[] = await response.json();
       
-      if (!response.ok) {
-        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
-      }
-      
-      const repos = await response.json();
-      console.log(`Successfully fetched ${repos.length} repos from GitHub.`);
-      
-      const githubTemplates: Template[] = repos
-        .filter((repo: any) => repo.name.toLowerCase().startsWith('x-template-'))
-        .map((repo: any) => {
-          // Check if we have curated data for this repo
-          const curated = TEMPLATES_DATA.find(t => t.id === repo.name);
-          
-          if (curated) {
-            return {
-              ...curated,
-              imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${repo.name}/main/.github/screenshots/latest.png`,
-              demoUrl: `https://ex2-axon.github.io/${repo.name}/`
-            };
-          }
+      // นำ ID ที่ได้มาแมปกับข้อมูลภาษาไทยที่มีอยู่ หรือสร้างข้อมูลพื้นฐานให้ใหม่
+      const finalTemplates: Template[] = autoIds.map(id => {
+        const curated = CURATED_TEMPLATES.find(t => t.id === id);
+        if (curated) return curated;
 
-          // Default metadata for new/unknown repos
-          return {
-            id: repo.name,
-            title: repo.name.replace(/-/g, ' ').toUpperCase(),
-            category: (repo.topics?.includes('ecommerce') ? 'E-Commerce' : 
-                       repo.topics?.includes('saas') ? 'SaaS' : 
-                       repo.topics?.includes('dashboard') ? 'Dashboard' : 
-                       repo.topics?.includes('portfolio') ? 'Portfolio' : 'Special') as any,
-            tags: repo.topics || ['Automated'],
-            description: repo.description || 'เทมเพลตใหม่จากระบบ Axon Engine ที่ตรวจพบโดยอัตโนมัติ',
-            demoUrl: `https://ex2-axon.github.io/${repo.name}/`,
-            imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${repo.name}/main/.github/screenshots/latest.png`,
-            difficulty: (repo.topics?.includes('advanced') ? 'Advanced' : 
-                         repo.topics?.includes('intermediate') ? 'Intermediate' : 'Beginner') as any,
-            techStack: repo.topics?.filter((t: string) => ['react', 'tailwind', 'typescript', 'vite'].includes(t)) || ['HTML', 'Tailwind CSS']
-          };
-        });
-
-      // Merge curated data
-      const finalTemplates = [...githubTemplates];
-      TEMPLATES_DATA.forEach(curated => {
-        if (!finalTemplates.find(t => t.id === curated.id)) {
-          finalTemplates.push(curated);
-        }
+        // ถ้าเป็น ID ใหม่ที่ยังไม่มีข้อมูลภาษาไทย ให้สร้าง Metadata พื้นฐานให้
+        return {
+          id,
+          title: id.replace(/-/g, ' ').toUpperCase(),
+          category: (id.includes('special') ? 'Special' : 'SaaS') as any,
+          tags: ['Automated'],
+          description: 'เทมเพลตใหม่จากระบบ Axon Engine ที่ตรวจพบโดยอัตโนมัติ',
+          demoUrl: `https://ex2-axon.github.io/${id}/`,
+          imageUrl: `https://raw.githubusercontent.com/Ex2-Axon/${id}/main/.github/screenshots/latest.png`,
+          difficulty: 'Intermediate',
+          techStack: ['HTML', 'Tailwind CSS']
+        };
       });
 
-      // Update state and cache
       setTemplates(finalTemplates);
-      localStorage.setItem(cacheKey, JSON.stringify({
-        timestamp: Date.now(),
-        data: finalTemplates
-      }));
-
-    } catch (err: any) {
+      localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: finalTemplates }));
+    } catch (err) {
       console.error('Error fetching templates:', err);
-      showToast(err.message.includes('Rate Limit') ? 'GitHub Rate Limit: จะใช้ข้อมูลจาก Cache แทน' : 'ไม่สามารถดึงข้อมูลล่าสุดได้');
-      
-      // If we have cached data (even if expired), use it as fallback instead of just hardcoded data
-      if (cachedData) {
-        const { data } = JSON.parse(cachedData);
-        setTemplates(data);
-      } else {
-        setTemplates(TEMPLATES_DATA);
-      }
+      // Fallback: ใช้ข้อมูลที่มีอยู่ในเครื่อง
+      setTemplates(CURATED_TEMPLATES);
     } finally {
       setIsLoadingTemplates(false);
     }
   };
+
+  useEffect(() => {
+    fetchTemplatesData();
+  }, []);
 
   // Sync state with URL hash (Simple Router)
   useEffect(() => {
@@ -383,11 +110,6 @@ export default function App() {
 
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [templates]);
-
-  // Fetch real-time templates from GitHub
-  useEffect(() => {
-    fetchGitHubTemplates();
-  }, []);
 
   // Update hash when page changes
   useEffect(() => {
@@ -663,7 +385,7 @@ Return your response strictly in JSON format matching this schema:
               </div>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <div className="bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl text-center">
-                  <span className="text-2xl font-bold text-white block">{TEMPLATES_DATA.length}</span>
+                  <span className="text-2xl font-bold text-white block">{templates.length}</span>
                   <span className="text-xs text-slate-500">เทมเพลตทั้งหมด</span>
                 </div>
                 <div className="bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl text-center">
@@ -708,10 +430,10 @@ Return your response strictly in JSON format matching this schema:
                       </button>
                     )}
                     <button 
-                      onClick={() => fetchGitHubTemplates(true)}
+                      onClick={() => fetchTemplatesData(true)}
                       disabled={isLoadingTemplates}
                       className="p-1 text-slate-400 hover:text-cyan-400 transition-colors disabled:opacity-50"
-                      title="รีเฟรชข้อมูลจาก GitHub"
+                      title="รีเฟรชข้อมูลล่าสุด"
                     >
                       <svg className={`w-4 h-4 ${isLoadingTemplates ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
