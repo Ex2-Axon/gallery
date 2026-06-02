@@ -47,14 +47,12 @@ jobs:
       - name: Send Discord embed
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          # choose first non-empty secret (allow either name)
-          WEBHOOK="${DISCORD_WEBHOOK_URL:-${DISCORD_WEBHOOK}}"
-          if [ -z "$WEBHOOK" ]; then
-            echo "Error: Discord webhook not set. Add secrets.DISCORD_WEBHOOK_URL or secrets.DISCORD_WEBHOOK" >&2
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "Error: Discord webhook not set. Add secrets.DISCORD_WEBHOOK_URL" >&2
             exit 1
           fi
+          WEBHOOK="$DISCORD_WEBHOOK_URL"
 
           REPO_URL="https://github.com/${{ github.repository }}"
           COMMIT_URL="${REPO_URL}/commit/${{ github.sha }}"
