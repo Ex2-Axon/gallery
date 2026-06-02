@@ -228,6 +228,34 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<'id' | 'title' | 'difficulty'>('id');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<string[]>([]);
+
+  // Try to load pre-generated templates JSON produced by the Python script
+  useEffect(() => {
+    const loadGenerated = async () => {
+      try {
+        const r = await fetch('/templates.generated.json');
+        if (!r.ok) return;
+        const data = await r.json();
+        const mapped = (data as any[]).map(d => ({
+          id: d.id,
+          title: d.title || d.id,
+          category: 'Special' as any,
+          tags: [],
+          description: '',
+          demoUrl: d.demoUrl,
+          imageUrl: d.imageUrl,
+          difficulty: 'Beginner' as any,
+          techStack: []
+        }));
+        setTemplates(mapped);
+        setIsLoadingTemplates(false);
+      } catch (e) {
+        // ignore and fallback to fetching from GitHub
+      }
+    };
+    loadGenerated();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Detail Simulator settings
   const [deviceMode, setDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
