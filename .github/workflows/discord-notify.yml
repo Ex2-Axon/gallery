@@ -46,16 +46,27 @@ jobs:
 
       - name: Send Discord embed
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          # choose first non-empty secret (allow either name)
+          WEBHOOK="${DISCORD_WEBHOOK_URL:-${DISCORD_WEBHOOK}}"
+          if [ -z "$WEBHOOK" ]; then
+            echo "Error: Discord webhook not set. Add secrets.DISCORD_WEBHOOK_URL or secrets.DISCORD_WEBHOOK" >&2
+            exit 1
+          fi
+
           REPO_URL="https://github.com/${{ github.repository }}"
           COMMIT_URL="${REPO_URL}/commit/${{ github.sha }}"
           BRANCH="${{ github.ref_name }}"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+          THREAD_NAME="deploy-${{ github.run_id }}"
+
           PAYLOAD=$(cat <<EOF
           {
             "username": "Axon Deploy Bot",
+            "thread_name": "${THREAD_NAME}",
             "avatar_url": "https://vitejs.dev/logo.svg",
             "embeds": [
               {
@@ -104,4 +115,4 @@ jobs:
           curl -s -o /dev/null -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
-            "$DISCORD_WEBHOOK"
+            "$WEBHOOK"
