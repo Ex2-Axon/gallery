@@ -8,14 +8,14 @@ GALLERY_DIR = Path(__file__).parent.absolute()
 
 def load_env_vars():
     """
-    โหลดค่าตัวแปรจากไฟล์ .env ที่อยู่ที่ root ของโปรเจกต์ (Axon/)
+    โหลดค่าตัวแปรจากไฟล์ .env ที่อยู่ในโฟลเดอร์ gallery/ เอง
     """
     env_vars = {}
-    # หาไฟล์ .env โดยถอยออกจากโฟลเดอร์ gallery ไป 1 ชั้น
-    env_path = GALLERY_DIR.parent / ".env"
+    # หาไฟล์ .env ในโฟลเดอร์ปัจจุบัน
+    env_path = GALLERY_DIR / ".env"
     
     if not env_path.exists():
-        print(f"❌ ไม่พบไฟล์ .env ที่: {env_path}")
+        print(f"❌ ไม่พบไฟล์ .env ในโฟลเดอร์ gallery: {env_path}")
         return None
 
     with open(env_path, "r", encoding="utf-8") as f:
@@ -47,15 +47,47 @@ def run_git_command(command):
         print(f"❌ Exception: {e}")
         return False, str(e)
 
+def ensure_gh_installed():
+    """
+    ตรวจสอบว่ามีการติดตั้ง GitHub CLI (gh) หรือยัง
+    หากยังไม่มี จะพยายามติดตั้งให้โดยอัตโนมัติ
+    """
+    print("🔍 ตรวจสอบ GitHub CLI (gh)...")
+    # ลองรัน gh --version
+    process = subprocess.run("gh --version", shell=True, capture_output=True, text=True)
+    
+    if process.returncode == 0:
+        print(f"✅ GitHub CLI ติดตั้งอยู่แล้ว: {process.stdout.splitlines()[0]}")
+        return True
+    else:
+        print("❌ ไม่พบ GitHub CLI (gh) กำลังพยายามติดตั้ง...")
+        if sys.platform == 'win32':
+            # ใช้ winget สำหรับ Windows
+            print("📦 กำลังติดตั้ง gh ผ่าน winget...")
+            install_proc = subprocess.run("winget install --id GitHub.cli --silent", shell=True)
+            if install_proc.returncode == 0:
+                print("✅ ติดตั้ง gh สำเร็จ! กรุณารันสคริปต์ใหม่อีกครั้งเพื่อให้ Path อัปเดต")
+                return True
+        
+        print("⚠️ ไม่สามารถติดตั้งอัตโนมัติได้ กรุณาติดตั้งจาก https://cli.github.com/")
+        return False
+
 def push_to_github():
     """
     สคริปต์หลักสำหรับ Push งานขึ้น GitHub โดยจำกัดขอบเขตเฉพาะโฟลเดอร์ gallery/
     """
+    # 0. ตรวจสอบความพร้อมของระบบ
+    if not ensure_gh_installed():
+        return
+
     print(f"\n" + "="*50)
     print(f"🚀 [GITHUB PUSH] เริ่มต้นที่: {GALLERY_DIR}")
     print("="*50)
     
-    # 1. โหลดค่าจาก .env
+    # ตรวจสอบ dependencies ของโปรเจกต์ (pnpm)
+    if (GALLERY_DIR / "package.json").exists():
+        print("📦 ตรวจสอบ node_modules ด้วย pnpm...")
+        subprocess.run("pnpm install", shell=True, cwd=str(GALLERY_DIR))
     env = load_env_vars()
     if not env: return
 
