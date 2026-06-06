@@ -1,0 +1,55 @@
+name: Notify Discord on Template Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify_discord:
+    runs-on: ubuntu-latest
+    steps:
+    # 1. สำคัญมาก! ต้องดึงไฟล์จาก Repo ลงเครื่องก่อน
+    - uses: actions/checkout@v5
+
+    # 2. สั่งยิงข้อความและส่งไฟล์ภาพเข้า Discord ทันที (ไม่ต้องเช็กเงื่อนไขแล้ว)
+    - name: Send Discord Notification with Screenshot
+      env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      run: |
+        if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+          echo "ERROR: DISCORD_WEBHOOK_URL is missing!"
+          exit 1
+        fi
+        
+        # ป้องกันปัญหา Quote ซ้อนด้วยการประกาศตัวแปร PAYLOAD แบบ EOF
+        PAYLOAD=$(cat <<EOF
+        {
+          "thread_name": "deploy-${{ github.run_id }}",
+          "embeds": [
+            {
+              "title": "🎉 Template Update - New Deploy",
+              "description": "Latest update of the template website. Preview attached below.",
+              "color": 5793266,
+              "fields": [
+                {
+                  "name": "Repository",
+                  "value": "${{ github.repository }}",
+                  "inline": true
+                },
+                {
+                  "name": "Branch",
+                  "value": "${{ github.ref_name }}",
+                  "inline": true
+                }
+              ]
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # ยิง curl ส่งไฟล์ภาพพร้อมก้อน PAYLOAD JSON สั่งเปิดกระทู้ใหม่ทันที
+        curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+          -F "file=@screenshot.png" \
+          -F "payload_json=$PAYLOAD"
