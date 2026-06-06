@@ -29,6 +29,7 @@ jobs:
           "embeds": [
             {
               "title": "🎉 Template Update - New Deploy",
+              "url": "https://gallery-theta-woad.vercel.app/",
               "description": "Latest update of the template website. Preview attached below.",
               "color": 5793266,
               "fields": [
