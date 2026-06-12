@@ -60,3 +60,4 @@ github_push.py
 github_sync.py 
 github_ui.py 
 github_update.py
+AGENTS.md
