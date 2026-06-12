@@ -18,11 +18,15 @@ interface TemplateGalleryProps {
 export default function TemplateGallery({ initialTemplates }: TemplateGalleryProps) {
   const [search, setSearch] = useState("");
 
+  const sortedTemplates = useMemo(() => {
+    return [...initialTemplates].reverse();
+  }, [initialTemplates]);
+
   const filteredTemplates = useMemo(() => {
-    return initialTemplates.filter((template) =>
+    return sortedTemplates.filter((template) =>
       template.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [initialTemplates, search]);
+  }, [search, sortedTemplates]);
 
   return (
     <div className="space-y-8">

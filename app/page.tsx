@@ -42,6 +42,47 @@ export default function Home() {
             </div>
           </div>
         </div>
+        
+        <section className="mb-8 grid gap-4 sm:grid-cols-2">
+          <a
+            href="https://ex2-axon.github.io/x-template-html000/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Download HTML5 Free Template"
+            className="transform rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:scale-[1.02] hover:shadow-md"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">HTML5 Free Template — ดาวน์โหลดฟรี</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  เลือกและดาวน์โหลด HTML5 template ที่ออกแบบมาให้โหลดเร็ว รองรับมือถือ และปรับแต่งง่าย เหมาะสำหรับโปรเจคเริ่มต้น
+                  — ใช้เป็นฐานสำหรับเว็บไซต์ธุรกิจ, พอร์ตโฟลิโอ หรือหน้า Landing Page.
+                </p>
+                <p className="mt-3 text-xs font-medium text-slate-500">SEO keywords: HTML5 template, free download, responsive, fast</p>
+              </div>
+              <div className="ml-4 flex-shrink-0 text-sm text-slate-400">Free ↗</div>
+            </div>
+          </a>
+
+          <a
+            href="https://x-template-next16-000.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View Next.js Template Demo"
+            className="transform rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:scale-[1.02] hover:shadow-md"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Next.js Template Showcase — ดูผลงานและ Deploy</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  ดูตัวอย่างเทมเพลต Next.js (App Router, TypeScript, Tailwind) พร้อมคู่มือการ Deploy ขึ้น Vercel — เหมาะสำหรับโปรเจคที่ต้องการความทันสมัยและ SEO-friendly.
+                </p>
+                <p className="mt-3 text-xs font-medium text-slate-500">SEO keywords: Next.js template, App Router, deploy Vercel, TypeScript, Tailwind</p>
+              </div>
+              <div className="ml-4 flex shrink-0 text-sm text-slate-400">Demo ↗</div>
+            </div>
+          </a>
+        </section>
 
         <TemplateGallery initialTemplates={templates} />
       </main>

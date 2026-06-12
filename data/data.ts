@@ -263,55 +263,5 @@ export const templates = [
     "name": "x-template-053",
     "url": "https://ex2-axon.github.io/x-template-053/",
     "image": "/x-template-053.png"
-  },
-  {
-    "name": "x-template-special-001",
-    "url": "https://ex2-axon.github.io/x-template-special-001/",
-    "image": "/x-template-special-001_20260603_152158.png"
-  },
-  {
-    "name": "x-template-special-002",
-    "url": "https://ex2-axon.github.io/x-template-special-002/",
-    "image": "/x-template-special-002_20260603_152240.png"
-  },
-  {
-    "name": "x-template-special-003",
-    "url": "https://ex2-axon.github.io/x-template-special-003/",
-    "image": "/x-template-special-003_20260603_152324.png"
-  },
-  {
-    "name": "x-template-special-004",
-    "url": "https://ex2-axon.github.io/x-template-special-004/",
-    "image": "/x-template-special-004_20260603_152409.png"
-  },
-  {
-    "name": "x-template-special-005",
-    "url": "https://ex2-axon.github.io/x-template-special-005/",
-    "image": "/x-template-special-005_20260603_152454.png"
-  },
-  {
-    "name": "x-template-special-006",
-    "url": "https://ex2-axon.github.io/x-template-special-006/",
-    "image": "/x-template-special-006_20260603_152544.png"
-  },
-  {
-    "name": "x-template-special-007",
-    "url": "https://ex2-axon.github.io/x-template-special-007/",
-    "image": "/x-template-special-007_20260603_152638.png"
-  },
-  {
-    "name": "x-template-special-008",
-    "url": "https://ex2-axon.github.io/x-template-special-008/",
-    "image": "/x-template-special-008_20260603_152733.png"
-  },
-  {
-    "name": "x-template-special-009",
-    "url": "https://ex2-axon.github.io/x-template-special-009/",
-    "image": "/x-template-special-009_20260603_152806.png"
-  },
-  {
-    "name": "x-template-special-010",
-    "url": "https://ex2-axon.github.io/x-template-special-010/",
-    "image": "/x-template-special-010_20260603_152839.png"
   }
 ];
