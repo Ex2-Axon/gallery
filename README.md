@@ -1,39 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gallery
 
-## Getting Started
+Next.js 16 + App Router project for a gallery-style template showcase.
 
-First, run the development server:
+## Overview
+
+This repository contains a modern Next.js application using:
+
+- `next` v16.2.7
+- `react` v19.2.4
+- `tailwindcss` v4
+- TypeScript
+- `@tailwindcss/postcss`
+
+The app is organized with the App Router under `app/` and includes reusable page templates for the gallery and pricing views.
+
+## Recommended Workflow
+
+Use `pnpm` for all local development and dependency management.
+
+### Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Run the app locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000` in your browser.
 
-## Learn More
+### Build for production
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Start production server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm start
+```
 
-## Gallery rules
-See [GALLERY_RULES.md](./GALLERY_RULES.md) for the baseline structure and version rules for this project.
+### Run linting
 
-## Deploy on Vercel
+```bash
+pnpm lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/` - App Router pages and layouts
+- `app/page.tsx` - Main gallery landing page
+- `app/layout.tsx` - App layout and metadata wrapper
+- `app/globals.css` - Global styles and Tailwind theme tokens
+- `app/pricing/page.tsx` - Pricing page
+- `app/template/[slug]/page.tsx` - Template detail pages
+- `app/TemplateGallery.tsx` - Shared gallery component
+- `data/` - Template content and configuration data
+- `public/` - Static assets
+
+## Notes
+
+- This project uses Tailwind CSS v4 and should define theme colors in `app/globals.css` using `@theme`.
+- The application follows App Router conventions and avoids legacy `pages/` routing.
+- `package.json` is configured for pnpm usage.
+
+## Gallery Rules
+
+See [GALLERY_RULES.md](./GALLERY_RULES.md) for baseline structure, naming conventions, and version rules.
+
+## Useful links
+
+- [Next.js Docs](https://nextjs.org/docs)
+- [Tailwind CSS v4](https://tailwindcss.com/docs)
+- [pnpm](https://pnpm.io)
+
+## License
+
+This project is private by default. Update the license section when you choose a license.
