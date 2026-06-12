@@ -93,7 +93,7 @@ export default async function TemplatePage({ params }: { params: Promise<{ slug:
                     </li>
                     <li className="flex gap-3">
                       <svg className="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                      ความเร็วสูงด้วย Next.js 16
+                      ความเร็วสูงด้วย Vite 8 และ Tailwind CSS 4
                     </li>
                     <li className="flex gap-3">
                       <svg className="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
